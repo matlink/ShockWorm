@@ -1,0 +1,93 @@
+\newglossaryentry{charge virale}
+{
+  name=charge virale,
+  first={\underline{charge virale}},
+  description={la charge virale est en quelque sorte le but final du ver, ce qu'il fait sur le système à part se dupliquer et s'y loger}
+}
+\newglossaryentry{keylogger}
+{
+  name=keylogger,
+  first={\underline{keylogger}},
+  description={programme tournant en tâche de fond qui enregistre les frappes de touche du clavier}
+}
+\newglossaryentry{backdoor}
+{
+  name=backdoor,
+  first={\underline{backdoor}},
+  description={porte dérobée en français : programme qui introduit un moyen d'accéder à la machine pour un usage futur}
+}
+\newglossaryentry{UNIX}
+{
+  name=UNIX,
+  first={\underline{UNIX}},
+  description={Famille de systèmes d'exploitation. En particulier, les GNU/Linux, MacOSX, sont des systèmes type UNIX}
+}
+\newglossaryentry{Shellshock}
+{
+  name=Shellshock,
+  first={\underline{Shellshock}},
+  description={faille informatique touchant les systèmes UNIX utilisant le shell bash}
+}
+\newglossaryentry{shell}
+{
+  name=shell,
+  first={\underline{shell}},
+  description={un shell est une interface en ligne de commande permettant d’interagir avec le système}
+}
+\newglossaryentry{bash}
+{
+  name=bash,
+  first={\underline{bash}},
+  description={bash est le plus répandu des shells disponibles sous UNIX}
+}
+\newglossaryentry{hashs}
+{
+  name=hashs,
+  first={\underline{hashs}},
+  description={le hash d'un mot de passe est l'image de ce mot de passe par une fonction non-injective pour laquelle il est difficile de retrouver son antécédent. Cela permet de ne pas stocker le mot de passe en clair, tout en étant capable de vérifier un mot de passe donné de façon relativement rapide}
+}
+\newglossaryentry{entetes HTTP}
+{
+  name=en-têtes HTTP,
+  first={\underline{en-têtes HTTP}},
+  description={les en-têtes HTTP sont des variables du protocole HTTP permettant d’identifier plus précisément le client, tels que le navigateur qu'il utilise, de quel site web il provient,...}
+}
+\newglossaryentry{CGI}
+{
+  name=CGI,
+  first={\underline{CGI}},
+  description={Common Gateway Interface : script utilisé pour générer des pages HTML}
+}
+\newglossaryentry{programme hote}
+{
+  name=programme hôte,
+  first={\underline{programme hôte}},
+  description={programme dans lequel le virus est logé. À chaque fois que ce programme est exécuté, le virus l'est aussi}
+}
+\newglossaryentry{faille}
+{
+  name=faille,
+  first={\underline{faille}},
+  plural=failles,
+  description={bug/problème d'un programme du système de la machine permettant un accès non permis à une personne tierce, ou d'exécuter des commandes à distance}
+}
+\newglossaryentry{droit root}
+{
+  name=droit root,
+  first={\underline{droit root}},
+  plural=droits root,
+  description={ce sont les droits les plus élevés des systèmes UNIX. Ils permettent d'écrire n'importe où sur le disque (à quelques conditions près)}
+}
+\newglossaryentry{wget}
+{
+  name=wget,
+  first={\underline{wget}},
+  description={commande UNIX permettant de récupérer une page web. Elle est disponible par défaut sur les systèmes dérivés de Debian}
+}
+\newglossaryentry{path}
+{
+  name=PATH,
+  first={\underline{PATH}},
+  plural=paths,
+  description={variable d'environnement contenant la liste des dossiers où le shell doit aller chercher les commandes demandées par l'utilisateur. La priorité se fait dans le sens de la lecture : dès que la commande demandée est trouvée dans un dossier, elle est exécutée}
+}
